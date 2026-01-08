@@ -1,0 +1,5 @@
+import usb_hid
+import storage
+
+usb_hid.enable((usb_hid.Device.KEYBOARD,))
+storage.disable_usb_drive()
