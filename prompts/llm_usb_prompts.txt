@@ -1,1 +1,1800 @@
+"vi ska nu börja med vårat ethical hacking projekt där vårat projekt ska vara rubber ducky/bad USB, vi har en pi pico 2w som enhet att använda och våran plan är att när vi kopplar in pico 2w så ska den öppna en hemsida som handlar om varför man inte ska koppla in okända enheter i sin dator samt öppna terminalen och ta fram enhetesinformation (dock inte ip-adress) kan du hjälpa mig att göra en sådan kod som sedan kan läggas in i pico 2w?"
 
+26 nov. 2025
+
+Planerade CircuitPython-kod för BadUSB-demonstration med säkerhetsfokus.
+
+
+
+
+
+Absolut! Jag hjälper dig skapa ett BadUSB-projekt för educational purposes. Detta är ett perfekt exempel på hur man kan demonstrera säkerhetsrisker med okända USB-enheter.
+
+Här är en komplett lösning för din Pi Pico 2 W:
+
+1. Förberedelser
+Installera CircuitPython på din Pico 2 W och se till att du har följande bibliotek i /lib-mappen:
+
+adafruit_hid (hela mappen)
+2. boot.py
+Skapa denna fil för att aktivera HID-läget:
+
+python
+import usb_hid
+import storage
+
+# Aktivera USB HID (keyboard)
+usb_hid.enable(
+    (usb_hid.Device.KEYBOARD,)
+)
+
+# Gör filsystemet read-only från datorns perspektiv (säkerhet)
+storage.disable_usb_drive()
+3. code.py
+Här är huvudskriptet:
+
+python
+import time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Initiera keyboard
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def detect_os():
+    """
+    Försök detektera OS baserat på timing
+    Returnerar 'windows', 'mac', eller 'linux'
+    """
+    # För detta projekt antar vi Windows som standard
+    # I praktiken är OS-detektering svår via USB HID
+    return 'windows'
+
+def press_key_combo(*keys):
+    """Tryck flera tangenter samtidigt"""
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text, delay=0.01):
+    """Skriv text med fördröjning"""
+    layout.write(text)
+    time.sleep(delay)
+
+def open_browser_and_terminal_windows():
+    """Öppna webbläsare och terminal på Windows"""
+    
+    # Öppna webbläsare med säkerhetsinfo
+    press_key_combo(Keycode.GUI, Keycode.R)  # Win+R
+    time.sleep(0.3)
+    type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+    time.sleep(0.2)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(1.5)
+    
+    # Öppna PowerShell
+    press_key_combo(Keycode.GUI, Keycode.X)  # Win+X
+    time.sleep(0.3)
+    keyboard.press(Keycode.I)  # PowerShell
+    keyboard.release_all()
+    time.sleep(1.5)
+    
+    # Visa systeminformation (utan IP)
+    type_text("Write-Host '=== SYSTEM INFORMATION ===' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    # Datornamn
+    type_text("Write-Host 'Computer Name:' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("$env:COMPUTERNAME")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    # Användarnamn
+    type_text("Write-Host 'Username:' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("$env:USERNAME")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    # OS Version
+    type_text("Write-Host 'OS Version:' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("(Get-WmiObject Win32_OperatingSystem).Caption")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    # Processor
+    type_text("Write-Host 'Processor:' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("(Get-WmiObject Win32_Processor).Name")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    # RAM
+    type_text("Write-Host 'Total RAM:' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("[math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory/1GB, 2).ToString() + ' GB'")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    # Varningsmeddelande
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host '=== WARNING ===' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host 'This device could have accessed sensitive information.' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host 'Never plug in unknown USB devices!' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+
+def open_browser_and_terminal_mac():
+    """Öppna webbläsare och terminal på macOS"""
+    
+    # Öppna Safari med URL
+    press_key_combo(Keycode.GUI, Keycode.SPACE)  # Spotlight
+    time.sleep(0.5)
+    type_text("safari")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(1.5)
+    
+    press_key_combo(Keycode.GUI, Keycode.L)  # Adressfält
+    time.sleep(0.3)
+    type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(1)
+    
+    # Öppna Terminal
+    press_key_combo(Keycode.GUI, Keycode.SPACE)
+    time.sleep(0.5)
+    type_text("terminal")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(1.5)
+    
+    # Visa systeminformation
+    type_text("echo '=== SYSTEM INFORMATION ==='")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("echo ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("echo 'Computer Name:'")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("scutil --get ComputerName")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("echo ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("echo 'Username:'")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("whoami")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("echo ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("echo 'macOS Version:'")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("sw_vers -productVersion")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    type_text("echo ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("echo '=== WARNING ==='")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("echo 'This device could have accessed sensitive information.'")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("echo 'Never plug in unknown USB devices!'")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+
+# Huvudprogram
+print("Starting BadUSB demo...")
+time.sleep(2)  # Vänta på att datorn ska känna igen enheten
+
+os_type = detect_os()
+
+if os_type == 'windows':
+    open_browser_and_terminal_windows()
+elif os_type == 'mac':
+    open_browser_and_terminal_mac()
+
+print("Demo completed!")
+4. Installation
+Koppla Pico 2 W i BOOTSEL-läge (håll BOOTSEL-knappen nedtryckt när du kopplar in)
+Kopiera CircuitPython-filerna till CIRCUITPY-enheten
+Skapa boot.py och code.py med koden ovan
+Koppla ur och in igen - skriptet körs automatiskt
+5. Alternativ URL
+Om du vill skapa en egen varningssida kan du använda:
+
+https://www.cisa.gov/news-events/news/using-caution-usb-drives (USA:s cybersäkerhetsmyndighet)
+Eller skapa en egen HTML-sida och hosta den
+Viktiga säkerhetsnoteringar:
+⚠️ Detta är endast för educational purposes
+
+Använd endast på dina egna enheter eller med uttryckligt tillstånd
+Perfekt för att demonstrera USB-säkerhetsrisker i din kurs
+Skriptet gör ingen skada - det bara visar information
+Vill du att jag justerar något, t.ex. lägga till support för Linux eller ändra vilken information som visas?
+
+gör detta specifikt för windows OS
+
+26 nov. 2025
+
+Tailored solution specifically for Windows environment.
+
+Perfekt! Här är en optimerad version specifikt för Windows:
+
+1. boot.py
+python
+import usb_hid
+import storage
+
+# Aktivera USB HID (keyboard)
+usb_hid.enable(
+    (usb_hid.Device.KEYBOARD,)
+)
+
+# Gör filsystemet read-only från datorns perspektiv
+storage.disable_usb_drive()
+2. code.py - Windows-optimerad version
+python
+import time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Initiera keyboard
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def press_key_combo(*keys):
+    """Tryck flera tangenter samtidigt"""
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text, delay=0.01):
+    """Skriv text med fördröjning"""
+    layout.write(text)
+    time.sleep(delay)
+
+def execute_windows_payload():
+    """Huvudfunktion för Windows-payload"""
+    
+    # Steg 1: Öppna webbläsare med säkerhetsinformation
+    print("Opening browser...")
+    press_key_combo(Keycode.GUI, Keycode.R)  # Win+R
+    time.sleep(0.5)
+    type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+    time.sleep(0.2)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(2)  # Ge webbläsaren tid att öppna
+    
+    # Steg 2: Öppna PowerShell
+    print("Opening PowerShell...")
+    press_key_combo(Keycode.GUI, Keycode.X)  # Win+X (snabbmeny)
+    time.sleep(0.4)
+    keyboard.press(Keycode.I)  # PowerShell
+    keyboard.release_all()
+    time.sleep(2)  # Vänta på att PowerShell öppnas
+    
+    # Steg 3: Visa systeminformation
+    print("Displaying system information...")
+    
+    # Header
+    type_text("Write-Host '========================================' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '     SECURITY DEMONSTRATION' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '========================================' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    # Datornamn
+    type_text("Write-Host 'Computer Name: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host $env:COMPUTERNAME -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    # Användarnamn
+    type_text("Write-Host 'Username: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host $env:USERNAME -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+    
+    # OS Version
+    type_text("Write-Host 'OS Version: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host (Get-WmiObject Win32_OperatingSystem).Caption -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    # OS Build
+    type_text("Write-Host 'OS Build: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host (Get-WmiObject Win32_OperatingSystem).BuildNumber -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    # Processor
+    type_text("Write-Host 'Processor: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host (Get-WmiObject Win32_Processor).Name -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    # RAM
+    type_text("Write-Host 'Total RAM: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host ([math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory/1GB, 2).ToString() + ' GB') -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    # Disk information
+    type_text("Write-Host 'System Drive: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("$disk = Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\"; Write-Host ($disk.DeviceID + ' - ' + [math]::Round($disk.Size/1GB, 2) + ' GB total') -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    # Windows version details
+    type_text("Write-Host 'Windows Edition: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host (Get-WmiObject Win32_OperatingSystem).Version -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    # Domän/Workgroup
+    type_text("Write-Host 'Domain/Workgroup: ' -NoNewline -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host (Get-WmiObject Win32_ComputerSystem).Domain -ForegroundColor White")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.7)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    # Varningsmeddelande
+    type_text("Write-Host '========================================' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '              WARNING!' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '========================================' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host 'This USB device has accessed your system information.' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host 'A malicious device could have:' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '  - Stolen passwords and credentials' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '  - Installed malware or keyloggers' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '  - Accessed and exfiltrated files' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host '  - Modified system settings' -ForegroundColor Yellow")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host 'NEVER PLUG IN UNKNOWN USB DEVICES!' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+    
+    type_text("Write-Host ''")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+    
+    type_text("Write-Host '========================================' -ForegroundColor Red")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+
+# Huvudprogram
+print("BadUSB Windows Demo - Starting...")
+time.sleep(2)  # Vänta 2 sekunder för att Windows ska känna igen enheten
+
+execute_windows_payload()
+
+print("Demo completed!")
+3. Alternativ enklare version (om du vill ha det snabbare)
+python
+import time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_cmd(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Öppna webbläsare
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Öppna PowerShell
+key_combo(Keycode.GUI, Keycode.X)
+time.sleep(0.4)
+keyboard.press(Keycode.I)
+keyboard.release_all()
+time.sleep(2)
+
+# Visa info
+type_cmd("Write-Host '=== SYSTEM INFO ===' -ForegroundColor Red")
+type_cmd("Write-Host 'Computer:' $env:COMPUTERNAME")
+type_cmd("Write-Host 'User:' $env:USERNAME")
+type_cmd("systeminfo | findstr /C:\"OS\"")
+type_cmd("Write-Host ''")
+type_cmd("Write-Host 'WARNING: Never plug in unknown USB devices!' -ForegroundColor Red")
+
+print("Done!")
+
+Installation:
+Anslut Pico 2 W med BOOTSEL-knappen nedtryckt
+Kopiera CircuitPython UF2-filen till RPI-RP2 enheten
+Skapa boot.py och code.py med koden ovan
+Koppla ur och in - skriptet körs automatiskt!
+
+
+
+Steg 5: Test av hela payload-funktionen
+B) Testversion med timer:
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_cmd(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+
+print("Starting in 5 seconds...")
+print("Switch to where you want the payload to run!")
+time.sleep(5)
+
+print("Opening browser...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+print("Opening PowerShell...")
+key_combo(Keycode.GUI, Keycode.X)
+time.sleep(0.4)
+keyboard.press(Keycode.I)
+keyboard.release_all()
+time.sleep(2)
+
+print("Displaying system info...")
+type_cmd("Write-Host '=== SYSTEM INFO ===' -ForegroundColor Red")
+type_cmd("Write-Host 'Computer:' $env:COMPUTERNAME")
+type_cmd("Write-Host 'User:' $env:USERNAME")
+type_cmd("Write-Host 'WARNING: Never plug unknown USB!' -ForegroundColor Red")
+
+print("Test completed!")
+Kör detta:
+
+Klicka F5
+Du har 5 sekunder att byta fönster/förbered dig
+Payload körs
+Se resultat i både Thonny-konsolen och på skärmen
+
+Metod 2: Simulera logiken (utan HID)
+Om du vill testa logiken utan att faktiskt köra tangentbordstryckningar:
+pythonimport time
+
+class MockKeyboard:
+    def press(self, *keys):
+        print(f"PRESS: {keys}")
+    
+    def release_all(self):
+        print("RELEASE ALL")
+
+class MockLayout:
+    def write(self, text):
+        print(f"TYPE: {text}")
+
+keyboard = MockKeyboard()
+layout = MockLayout()
+
+def key_combo(*keys):
+    print(f"\n=== KEY COMBO: {keys} ===")
+    time.sleep(0.1)
+
+def type_cmd(text):
+    print(f"\n=== COMMAND: {text} ===")
+    time.sleep(0.1)
+
+# Testa hela flödet
+print("=== SIMULATION START ===\n")
+time.sleep(1)
+
+print("Step 1: Open browser")
+key_combo("WIN", "R")
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+print("ENTER")
+
+print("\nStep 2: Open PowerShell")
+key_combo("WIN", "X")
+print("Press I")
+
+print("\nStep 3: Show system info")
+type_cmd("Write-Host '=== SYSTEM INFO ===' -ForegroundColor Red")
+type_cmd("Write-Host 'Computer:' $env:COMPUTERNAME")
+type_cmd("Write-Host 'User:' $env:USERNAME")
+
+print("\n=== SIMULATION COMPLETE ===")
+Detta kan köras direkt på din Windows-dator i Thonny utan Pico 2 W!
+Rekommenderad Workflow:
+
+Utveckling: Skriv kod i Thonny på din dator
+Simulering: Kör simuleringsversionen (Metod 2) för att verifiera logik
+Test på Pico: Kör testversionen (Metod 1B) med timer från Thonny
+Deploy: Spara som code.py på Pico 2 W för automatisk körning vid anslutning
+
+Tips för Debugging i Thonny:
+python# Lägg till debug-output i din kod:
+print(f"DEBUG: About to press keys...")
+key_combo(Keycode.GUI, Keycode.R)
+print(f"DEBUG: Keys pressed successfully")
+time.sleep(0.5)
+print(f"DEBUG: About to type URL...")
+Vill du att jag ska göra en komplett test-version med mer debugging och steg-för-steg-körning?vi kör detta med us-layout, det blir lättast så, nu vill jag att du enbart skriver informationen så det kommer upp en gång dvs att allt som printas med en annan färg tas bort, och att den systeminformationen som tas upp läggs in i notepad istället26 nov. 20252 / 2Utredde metoder för att samla systeminformation direkt i Notepad.15sAnvändaren vill:
+
+Ta bort alla färgade Write-Host kommandon (de som har -ForegroundColor)
+Bara visa informationen en gång (alltså inga separata "labels" och värden)
+Lägga all systeminformation i Notepad istället för PowerShell
+
+Så istället för att öppna PowerShell och köra kommandon där, ska vi:
+
+Öppna webbläsaren (detta behålls)
+Öppna Notepad
+Skriva all systeminformation direkt i Notepad
+
+För att få systeminformation i Notepad måste vi använda en annan approach. Vi kan:
+
+Öppna Notepad direkt och skriva text
+Eller öppna CMD/PowerShell, få info, och pipe:a till en fil, sedan öppna filen i Notepad
+
+Den enklaste metoden är att öppna Notepad och skriva informationen direkt som text, men då får vi inte faktiska systemvärden utan bara statisk text.
+En smartare lösning är att:
+
+Öppna Run (Win+R)
+Köra en PowerShell one-liner som samlar info och skriver till en fil
+Öppna filen i Notepad
+
+Eller ännu bättre:
+
+Öppna PowerShell
+Kör kommandon som samlar info och sparar till en fil
+Öppna filen automatiskt i Notepad
+Stäng PowerShell
+
+Faktiskt, ännu enklare: Använd PowerShell för att samla info OCH öppna Notepad direkt med piped content.
+Men det enklaste för BadUSB är att:
+
+Öppna webbläsare
+Öppna Notepad
+Skriva varningstext och samla systeminformation snabbt i bakgrunden
+Köra PowerShell för att appenda info till en fil
+Öppna filen direkt i Notepad
+
+Jag ser en effektiv metod där vi kombinerar flera steg: skriva varningstext, samla systeminformation i bakgrunden, och presentera allt i Notepad utan att störa användaren.Perfekt! Här är en renare version som lägger all information i Notepad:
+boot.py (samma som tidigare)
+pythonimport usb_hid
+import storage
+
+# Aktivera USB HID (keyboard)
+usb_hid.enable(
+    (usb_hid.Device.KEYBOARD,)
+)
+
+# Gör filsystemet read-only från datorns perspektiv
+storage.disable_usb_drive()
+code.py - Allt i Notepad
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Initiera keyboard
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def press_key_combo(*keys):
+    """Tryck flera tangenter samtidigt"""
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text):
+    """Skriv text"""
+    layout.write(text)
+    time.sleep(0.01)
+
+def execute_payload():
+    """Huvudfunktion - öppna webbläsare och skapa systeminformation i Notepad"""
+    
+    # Steg 1: Öppna webbläsare med säkerhetsinformation
+    print("Opening browser...")
+    press_key_combo(Keycode.GUI, Keycode.R)  # Win+R
+    time.sleep(0.5)
+    type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(2)
+    
+    # Steg 2: Skapa PowerShell-kommando som samlar info och öppnar i Notepad
+    print("Creating system info file...")
+    press_key_combo(Keycode.GUI, Keycode.R)  # Win+R igen
+    time.sleep(0.5)
+    
+    # PowerShell one-liner som samlar info och öppnar i Notepad
+    type_text("powershell -WindowStyle Hidden -Command \"")
+    type_text("$file = '$env:TEMP\\usb_warning.txt'; ")
+    type_text("'======================================' | Out-File $file; ")
+    type_text("'   SECURITY DEMONSTRATION' | Out-File $file -Append; ")
+    type_text("'======================================' | Out-File $file -Append; ")
+    type_text("'' | Out-File $file -Append; ")
+    type_text("'Computer Name: ' + $env:COMPUTERNAME | Out-File $file -Append; ")
+    type_text("'Username: ' + $env:USERNAME | Out-File $file -Append; ")
+    type_text("'OS Version: ' + (Get-WmiObject Win32_OperatingSystem).Caption | Out-File $file -Append; ")
+    type_text("'OS Build: ' + (Get-WmiObject Win32_OperatingSystem).BuildNumber | Out-File $file -Append; ")
+    type_text("'Processor: ' + (Get-WmiObject Win32_Processor).Name | Out-File $file -Append; ")
+    type_text("'Total RAM: ' + [math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory/1GB, 2).ToString() + ' GB' | Out-File $file -Append; ")
+    type_text("$disk = Get-WmiObject Win32_LogicalDisk -Filter \\\"DeviceID='C:'\\\"; ")
+    type_text("'System Drive: ' + $disk.DeviceID + ' - ' + [math]::Round($disk.Size/1GB, 2) + ' GB total' | Out-File $file -Append; ")
+    type_text("'Domain/Workgroup: ' + (Get-WmiObject Win32_ComputerSystem).Domain | Out-File $file -Append; ")
+    type_text("'' | Out-File $file -Append; ")
+    type_text("'======================================' | Out-File $file -Append; ")
+    type_text("'           WARNING!' | Out-File $file -Append; ")
+    type_text("'======================================' | Out-File $file -Append; ")
+    type_text("'' | Out-File $file -Append; ")
+    type_text("'This USB device has accessed your system information.' | Out-File $file -Append; ")
+    type_text("'' | Out-File $file -Append; ")
+    type_text("'A malicious device could have:' | Out-File $file -Append; ")
+    type_text("'  - Stolen passwords and credentials' | Out-File $file -Append; ")
+    type_text("'  - Installed malware or keyloggers' | Out-File $file -Append; ")
+    type_text("'  - Accessed and exfiltrated files' | Out-File $file -Append; ")
+    type_text("'  - Modified system settings' | Out-File $file -Append; ")
+    type_text("'' | Out-File $file -Append; ")
+    type_text("'NEVER PLUG IN UNKNOWN USB DEVICES!' | Out-File $file -Append; ")
+    type_text("'' | Out-File $file -Append; ")
+    type_text("'======================================' | Out-File $file -Append; ")
+    type_text("notepad $file\"")
+    
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+
+# Huvudprogram
+print("BadUSB Windows Demo - Starting...")
+time.sleep(2)  # Vänta på att Windows ska känna igen enheten
+
+execute_payload()
+
+print("Demo completed!")
+Alternativ: Enklare och snabbare version
+Om PowerShell-kommandot blir för långt, här är en kortare version:
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text):
+    layout.write(text)
+    time.sleep(0.01)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Steg 1: Öppna webbläsare
+print("Opening browser...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Steg 2: Öppna Run igen och kör PowerShell-kommando
+print("Creating info file...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+
+# Kortare PowerShell-kommando
+type_text("powershell -WindowStyle Hidden -Command \"")
+type_text("$f='$env:TEMP\\usb.txt';")
+type_text("'=== SYSTEM INFORMATION ==='|Out-File $f;")
+type_text("''|Out-File $f -Append;")
+type_text("'Computer: '+$env:COMPUTERNAME|Out-File $f -Append;")
+type_text("'User: '+$env:USERNAME|Out-File $f -Append;")
+type_text("'OS: '+(gwmi Win32_OperatingSystem).Caption|Out-File $f -Append;")
+type_text("'CPU: '+(gwmi Win32_Processor).Name|Out-File $f -Append;")
+type_text("'RAM: '+[math]::Round((gwmi Win32_ComputerSystem).TotalPhysicalMemory/1GB,2)+' GB'|Out-File $f -Append;")
+type_text("''|Out-File $f -Append;")
+type_text("'=== WARNING ==='|Out-File $f -Append;")
+type_text("'This device accessed your system!'|Out-File $f -Append;")
+type_text("'NEVER plug in unknown USB devices!'|Out-File $f -Append;")
+type_text("notepad $f\"")
+
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+
+print("Done!")
+Vad händer nu:
+
+✅ Öppnar webbläsare med säkerhetsinformation
+✅ Skapar en textfil med all systeminformation
+✅ Öppnar filen automatiskt i Notepad
+✅ PowerShell-fönstret är dolt (WindowStyle Hidden)
+✅ All information visas en gång i ren text
+✅ Inga färger (bara ren text i Notepad)
+
+Filen skapas i %TEMP%\usb_warning.txt (eller usb.txt i kortversionen) och öppnas direkt i Notepad!
+Vilken version föredrar du - den långa med mer information eller den korta som är snabbare?vi struntar i notepad eftersom jag inte har det på datorn, istället kör allting i terminalen26 nov. 2025Pivoterade lösning från Notepad till terminalbaserad systeminformation.Användaren vill ha allt i terminalen istället för Notepad. Jag ska göra en version där all systeminformation visas i PowerShell/terminalen, men utan färgkodning (som hen bad om tidigare - "allt som printas med en annan färg tas bort").
+Så jag behöver:
+
+Öppna webbläsare med säkerhetsinformation
+Öppna PowerShell
+Visa all systeminformation UTAN färgkodning (Write-Host utan -ForegroundColor)
+Visa varningen
+Allt ska visas en gång (inte upprepas)
+
+Låt mig skapa en enkel, ren version.Perfekt! Här är en ren version där allt visas i terminalen:
+boot.py (samma som tidigare)
+pythonimport usb_hid
+import storage
+
+# Aktivera USB HID (keyboard)
+usb_hid.enable(
+    (usb_hid.Device.KEYBOARD,)
+)
+
+# Gör filsystemet read-only från datorns perspektiv
+storage.disable_usb_drive()
+code.py - Allt i terminalen
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# Initiera keyboard
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def press_key_combo(*keys):
+    """Tryck flera tangenter samtidigt"""
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text):
+    """Skriv text"""
+    layout.write(text)
+    time.sleep(0.01)
+
+def type_cmd(text):
+    """Skriv kommando och tryck Enter"""
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+
+def execute_payload():
+    """Huvudfunktion - öppna webbläsare och visa systeminformation i terminal"""
+    
+    # Steg 1: Öppna webbläsare med säkerhetsinformation
+    print("Opening browser...")
+    press_key_combo(Keycode.GUI, Keycode.R)  # Win+R
+    time.sleep(0.5)
+    type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(2)
+    
+    # Steg 2: Öppna PowerShell
+    print("Opening PowerShell...")
+    press_key_combo(Keycode.GUI, Keycode.X)  # Win+X
+    time.sleep(0.4)
+    keyboard.press(Keycode.I)  # PowerShell
+    keyboard.release_all()
+    time.sleep(2)
+    
+    # Steg 3: Visa systeminformation
+    print("Displaying system information...")
+    
+    # Header
+    type_cmd("Write-Host '========================================'")
+    type_cmd("Write-Host '     SECURITY DEMONSTRATION'")
+    type_cmd("Write-Host '========================================'")
+    type_cmd("Write-Host ''")
+    
+    # Systeminformation
+    type_cmd("Write-Host 'Computer Name: ' -NoNewline; Write-Host $env:COMPUTERNAME")
+    type_cmd("Write-Host 'Username: ' -NoNewline; Write-Host $env:USERNAME")
+    type_cmd("Write-Host 'OS Version: ' -NoNewline; (Get-WmiObject Win32_OperatingSystem).Caption")
+    type_cmd("Write-Host 'OS Build: ' -NoNewline; (Get-WmiObject Win32_OperatingSystem).BuildNumber")
+    type_cmd("Write-Host 'Processor: ' -NoNewline; (Get-WmiObject Win32_Processor).Name")
+    type_cmd("Write-Host 'Total RAM: ' -NoNewline; [math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory/1GB, 2).ToString() + ' GB'")
+    type_cmd("$disk = Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\"; Write-Host 'System Drive: ' -NoNewline; Write-Host ($disk.DeviceID + ' - ' + [math]::Round($disk.Size/1GB, 2) + ' GB total')")
+    type_cmd("Write-Host 'Domain/Workgroup: ' -NoNewline; (Get-WmiObject Win32_ComputerSystem).Domain")
+    
+    type_cmd("Write-Host ''")
+    
+    # Varningsmeddelande
+    type_cmd("Write-Host '========================================'")
+    type_cmd("Write-Host '              WARNING!'")
+    type_cmd("Write-Host '========================================'")
+    type_cmd("Write-Host ''")
+    type_cmd("Write-Host 'This USB device has accessed your system information.'")
+    type_cmd("Write-Host ''")
+    type_cmd("Write-Host 'A malicious device could have:'")
+    type_cmd("Write-Host '  - Stolen passwords and credentials'")
+    type_cmd("Write-Host '  - Installed malware or keyloggers'")
+    type_cmd("Write-Host '  - Accessed and exfiltrated files'")
+    type_cmd("Write-Host '  - Modified system settings'")
+    type_cmd("Write-Host ''")
+    type_cmd("Write-Host 'NEVER PLUG IN UNKNOWN USB DEVICES!'")
+    type_cmd("Write-Host ''")
+    type_cmd("Write-Host '========================================'")
+
+# Huvudprogram
+print("BadUSB Windows Demo - Starting...")
+time.sleep(2)  # Vänta på att Windows ska känna igen enheten
+
+execute_payload()
+
+print("Demo completed!")
+Kortare/snabbare version:
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_cmd(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Öppna webbläsare
+print("Opening browser...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Öppna PowerShell
+print("Opening PowerShell...")
+key_combo(Keycode.GUI, Keycode.X)
+time.sleep(0.4)
+keyboard.press(Keycode.I)
+keyboard.release_all()
+time.sleep(2)
+
+# Visa systeminformation
+print("Displaying info...")
+type_cmd("echo '========================================'")
+type_cmd("echo '     SECURITY DEMONSTRATION'")
+type_cmd("echo '========================================'")
+type_cmd("echo.")
+type_cmd("echo Computer Name: %COMPUTERNAME%")
+type_cmd("echo Username: %USERNAME%")
+type_cmd("systeminfo | findstr /C:\"OS Name\" /C:\"OS Version\"")
+type_cmd("wmic cpu get name")
+type_cmd("systeminfo | findstr /C:\"Total Physical Memory\"")
+type_cmd("echo.")
+type_cmd("echo '========================================'")
+type_cmd("echo '              WARNING!'")
+type_cmd("echo '========================================'")
+type_cmd("echo.")
+type_cmd("echo This USB device accessed your system!")
+type_cmd("echo A malicious device could have:")
+type_cmd("echo   - Stolen passwords and credentials")
+type_cmd("echo   - Installed malware or keyloggers")
+type_cmd("echo   - Accessed and exfiltrated files")
+type_cmd("echo.")
+type_cmd("echo NEVER PLUG IN UNKNOWN USB DEVICES!")
+type_cmd("echo.")
+type_cmd("echo '========================================'")
+
+print("Done!")
+Vad händer:
+
+✅ Öppnar webbläsare med säkerhetsinformation
+✅ Öppnar PowerShell-terminal
+✅ Visar all systeminformation utan färgkodning
+✅ Visar varningsmeddelande
+✅ Allt visas en gång i terminalen
+✅ Ren text, inga färger
+
+Vilken version föredrar du - PowerShell-versionen (första) eller CMD-versionen (andra)?ta nu bort alla echos och gör så att det bara skrivs direkt i terminalen26 nov. 2025Distingjorde mellan direkt textinmatning och systemkommandokörning.Användaren vill att informationen ska skrivas direkt i terminalen utan att använda echo-kommandon. Det betyder att jag ska använda type_text() funktionen för att skriva texten direkt istället för att skriva kommandon som sedan exekveras.
+Så istället för:
+pythontype_cmd("echo 'text'")
+Ska jag bara skriva texten direkt:
+pythontype_text("text")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+Men vänta - de vill fortfarande köra kommandona för att hämta systeminformation som %COMPUTERNAME%, systeminfo, etc. Så jag behöver köra de faktiska kommandona men utan "echo" för vanlig text.
+Låt mig tänka... de vill ha ren text som skrivs direkt i terminalen. Så jag ska:
+
+Öppna terminalen
+Skriva texten direkt (utan echo)
+Köra kommandona för att få systeminformation
+
+Så det blir en blandning - ren text för rubriker och varningar, och kommandon för att hämta systeminformation.Perfekt! Här är en version där texten skrivs direkt i terminalen:
+code.py - Ren text direkt i terminalen
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text):
+    layout.write(text)
+    time.sleep(0.01)
+
+def type_line(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.3)
+
+def type_cmd(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.6)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Öppna webbläsare
+print("Opening browser...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Öppna PowerShell
+print("Opening PowerShell...")
+key_combo(Keycode.GUI, Keycode.X)
+time.sleep(0.4)
+keyboard.press(Keycode.I)
+keyboard.release_all()
+time.sleep(2)
+
+# Visa information
+print("Displaying info...")
+
+# Header
+type_line("========================================")
+type_line("     SECURITY DEMONSTRATION")
+type_line("========================================")
+type_line("")
+
+# Systeminformation
+type_text("Computer Name: ")
+type_cmd("$env:COMPUTERNAME")
+
+type_text("Username: ")
+type_cmd("$env:USERNAME")
+
+type_text("OS Version: ")
+type_cmd("(Get-WmiObject Win32_OperatingSystem).Caption")
+
+type_text("OS Build: ")
+type_cmd("(Get-WmiObject Win32_OperatingSystem).BuildNumber")
+
+type_text("Processor: ")
+type_cmd("(Get-WmiObject Win32_Processor).Name")
+
+type_text("Total RAM: ")
+type_cmd("[math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory/1GB, 2).ToString() + ' GB'")
+
+type_text("System Drive: ")
+type_cmd("$disk = Get-WmiObject Win32_LogicalDisk -Filter \"DeviceID='C:'\"; $disk.DeviceID + ' - ' + [math]::Round($disk.Size/1GB, 2) + ' GB total'")
+
+type_text("Domain/Workgroup: ")
+type_cmd("(Get-WmiObject Win32_ComputerSystem).Domain")
+
+type_line("")
+
+# Varning
+type_line("========================================")
+type_line("              WARNING!")
+type_line("========================================")
+type_line("")
+type_line("This USB device has accessed your system information.")
+type_line("")
+type_line("A malicious device could have:")
+type_line("  - Stolen passwords and credentials")
+type_line("  - Installed malware or keyloggers")
+type_line("  - Accessed and exfiltrated files")
+type_line("  - Modified system settings")
+type_line("")
+type_line("NEVER PLUG IN UNKNOWN USB DEVICES!")
+type_line("")
+type_line("========================================")
+
+print("Done!")
+Ännu enklare CMD-version (om PowerShell är för långsamt):
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_line(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.2)
+
+def type_cmd(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.5)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Öppna webbläsare
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Öppna CMD
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("cmd")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(1.5)
+
+# Visa information
+type_line("========================================")
+type_line("     SECURITY DEMONSTRATION")
+type_line("========================================")
+type_line("")
+
+layout.write("Computer Name: ")
+type_cmd("%COMPUTERNAME%")
+
+layout.write("Username: ")
+type_cmd("%USERNAME%")
+
+type_cmd("systeminfo | findstr /C:\"OS Name\" /C:\"OS Version\" /C:\"System Type\"")
+type_cmd("wmic cpu get name /value | findstr Name")
+type_cmd("systeminfo | findstr /C:\"Total Physical Memory\"")
+
+type_line("")
+type_line("========================================")
+type_line("              WARNING!")
+type_line("========================================")
+type_line("")
+type_line("This USB device has accessed your system information.")
+type_line("")
+type_line("A malicious device could have:")
+type_line("  - Stolen passwords and credentials")
+type_line("  - Installed malware or keyloggers")
+type_line("  - Accessed and exfiltrated files")
+type_line("  - Modified system settings")
+type_line("")
+type_line("NEVER PLUG IN UNKNOWN USB DEVICES!")
+type_line("")
+type_line("========================================")
+
+print("Done!")
+
+Vad händer nu:
+
+✅ Öppnar webbläsare
+✅ Öppnar terminal (PowerShell eller CMD)
+✅ Skriver text direkt i terminalen (ingen echo)
+✅ Kör kommandon för att visa systeminformation
+✅ Visar varningsmeddelande
+✅ Allt är ren text som skrivs direkt
+
+Vilken version passar bäst - PowerShell (långsammare men mer info) eller CMD (snabbare)?cmd var snabbare, men det vi gör nu istället är att se till att onenote öppnas och all information vi vill få ut skrivs där26 nov. 2025Strategized method för att samla systeminformation och skriva den i OneNote.28sAnvändaren vill nu att informationen ska skrivas i OneNote istället för terminalen. Det innebär att jag behöver:
+
+Öppna webbläsare med säkerhetsinfo (behålls)
+Öppna OneNote
+Skriva all systeminformation direkt i OneNote istället för i terminalen
+
+För att öppna OneNote på Windows kan man använda:
+
+Win+R och sedan skriva "onenote:" eller "onenote"
+Eller använda Win+Alt+N om det är konfigurerat som genväg
+
+Men det enklaste är att använda Win+R och skriva "onenote".
+Sedan behöver jag först köra kommandona för att få systeminformationen, och sedan klistra in resultaten i OneNote. Men det är komplicerat att köra kommandon och sedan kopiera resultaten.
+En bättre approach är att:
+
+Öppna OneNote först
+Skriva all text direkt i OneNote (labels och varningar)
+För systeminformation kan jag antingen:
+
+Skriva statisk text som "Computer Name: [värde kommer här]" och sedan faktiskt köra kommandot i bakgrunden och kopiera resultatet
+Eller bara öppna en CMD i bakgrunden, köra kommandona med output till en fil, och sedan öppna filen och kopiera innehållet till OneNote
+
+
+
+Det enklaste är nog att:
+
+Öppna webbläsare
+Öppna CMD i bakgrunden (hidden)
+Köra kommandon och spara output till en temp-fil
+Öppna OneNote
+Läsa från temp-filen och skriva i OneNote
+
+Men det blir ganska komplext. En enklare lösning:
+
+Öppna webbläsare
+Öppna OneNote
+Skriva headers och varningstext direkt
+För systeminformation - använda PowerShell för att hämta värden och skriva dem direkt i anteckningsbok
+
+Jag inser nu att den mest direkta metoden är att använda PowerShell för att samla systeminformation och sedan omedelbart infoga resultaten i OneNote. Detta förenklar processen avsevärt och minskar antalet manuella steg. I'll continue the partial thought from the previous rewritten thinking and then summarize the new thinking:
+...köra dem någonstans. The simplest approach involves gathering system information efficiently. I'll focus on two primary methods for capturing and transferring system details to OneNote.
+The first method involves using PowerShell to collect comprehensive system information, ensuring we capture all relevant details automatically. This approach allows precise extraction of environmental variables and system configurations. The key steps include running targeted PowerShell commands to retrieve specific system data, then transferring that information directly into OneNote.
+The alternative method involves a more manual process where I write system information directly into OneNote, potentially using placeholder text for certain details. However, the preferred approach emphasizes obtaining actual system information, which requires a systematic method of data collection and transfer.
+The core objective remains consistent: create a streamlined workflow that captures system information accurately and allows seamless integration into OneNote with minimal manual intervention.Perfekt! Här är en version som öppnar OneNote och skriver all information där:
+code.py - Skriver i OneNote
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_text(text):
+    layout.write(text)
+    time.sleep(0.01)
+
+def type_line(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Steg 1: Öppna webbläsare
+print("Opening browser...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+type_text("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Steg 2: Samla systeminformation och kopiera till clipboard
+print("Gathering system info...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+type_text("powershell -WindowStyle Hidden -Command \"")
+type_text("$info = '========================================`n'; ")
+type_text("$info += '     SECURITY DEMONSTRATION`n'; ")
+type_text("$info += '========================================`n`n'; ")
+type_text("$info += 'Computer Name: ' + $env:COMPUTERNAME + '`n'; ")
+type_text("$info += 'Username: ' + $env:USERNAME + '`n'; ")
+type_text("$info += 'OS Version: ' + (Get-WmiObject Win32_OperatingSystem).Caption + '`n'; ")
+type_text("$info += 'OS Build: ' + (Get-WmiObject Win32_OperatingSystem).BuildNumber + '`n'; ")
+type_text("$info += 'Processor: ' + (Get-WmiObject Win32_Processor).Name + '`n'; ")
+type_text("$info += 'Total RAM: ' + [math]::Round((Get-WmiObject Win32_ComputerSystem).TotalPhysicalMemory/1GB, 2).ToString() + ' GB`n'; ")
+type_text("$disk = Get-WmiObject Win32_LogicalDisk -Filter \\\"DeviceID='C:'\\\"; ")
+type_text("$info += 'System Drive: ' + $disk.DeviceID + ' - ' + [math]::Round($disk.Size/1GB, 2) + ' GB total`n'; ")
+type_text("$info += 'Domain/Workgroup: ' + (Get-WmiObject Win32_ComputerSystem).Domain + '`n`n'; ")
+type_text("$info += '========================================`n'; ")
+type_text("$info += '              WARNING!`n'; ")
+type_text("$info += '========================================`n`n'; ")
+type_text("$info += 'This USB device has accessed your system information.`n`n'; ")
+type_text("$info += 'A malicious device could have:`n'; ")
+type_text("$info += '  - Stolen passwords and credentials`n'; ")
+type_text("$info += '  - Installed malware or keyloggers`n'; ")
+type_text("$info += '  - Accessed and exfiltrated files`n'; ")
+type_text("$info += '  - Modified system settings`n`n'; ")
+type_text("$info += 'NEVER PLUG IN UNKNOWN USB DEVICES!`n`n'; ")
+type_text("$info += '========================================'; ")
+type_text("Set-Clipboard -Value $info\"")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(3)  # Ge PowerShell tid att samla info
+
+# Steg 3: Öppna OneNote
+print("Opening OneNote...")
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+type_text("onenote:")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(3)  # Ge OneNote tid att öppna
+
+# Steg 4: Klistra in informationen i OneNote
+print("Pasting info to OneNote...")
+time.sleep(1)
+key_combo(Keycode.CONTROL, Keycode.V)  # Ctrl+V
+time.sleep(0.5)
+
+print("Done!")
+Alternativ: Enklare version om du vill skriva direkt
+pythonimport time
+import board
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+keyboard = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(keyboard)
+
+def key_combo(*keys):
+    keyboard.press(*keys)
+    time.sleep(0.1)
+    keyboard.release_all()
+    time.sleep(0.1)
+
+def type_line(text):
+    layout.write(text)
+    keyboard.press(Keycode.ENTER)
+    keyboard.release_all()
+    time.sleep(0.15)
+
+# Vänta på Windows
+time.sleep(2)
+
+# Öppna webbläsare
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(2)
+
+# Öppna OneNote
+key_combo(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+layout.write("onenote:")
+keyboard.press(Keycode.ENTER)
+keyboard.release_all()
+time.sleep(3)  # Vänta på OneNote
+
+# Skapa ny sida (om OneNote är öppet)
+time.sleep(1)
+key_combo(Keycode.CONTROL, Keycode.N)  # Ny sida
+time.sleep(0.5)
+
+# Skriv information direkt
+type_line("========================================")
+type_line("     SECURITY DEMONSTRATION")
+type_line("========================================")
+type_line("")
+type_line("Computer Name: [Will be displayed]")
+type_line("Username: [Will be displayed]")
+type_line("OS Version: Windows")
+type_line("Processor: [System Processor]")
+type_line("Total RAM: [System RAM]")
+type_line("System Drive: C:")
+type_line("")
+type_line("========================================")
+type_line("              WARNING!")
+type_line("========================================")
+type_line("")
+type_line("This USB device has accessed your system information.")
+type_line("")
+type_line("A malicious device could have:")
+type_line("  - Stolen passwords and credentials")
+type_line("  - Installed malware or keyloggers")
+type_line("  - Accessed and exfiltrated files")
+type_line("  - Modified system settings")
+type_line("")
+type_line("NEVER PLUG IN UNKNOWN USB DEVICES!")
+type_line("")
+type_line("========================================")
+
+print("Done!")
+Vad händer:
+Version 1 (Rekommenderad):
+
+✅ Öppnar webbläsare
+✅ Samlar all riktig systeminformation med PowerShell
+✅ Kopierar informationen till clipboard
+✅ Öppnar OneNote
+✅ Klistrar in informationen (Ctrl+V)
+
+Version 2 (Enklare):
+
+✅ Öppnar webbläsare
+✅ Öppnar OneNote
+✅ Skapar ny sida
+✅ Skriver all text direkt (med placeholders för systeminfo)
+
+Vilken version föredrar du? Den första ger dig faktisk systeminformation, den andra är snabbare men visar bara placeholder-text.okej vi börjar om helt mer eller mindre, detta blir inte bättre...
+gör så enkel kod som möjligt hela tiden, skriv så lite information som måste när det ska komma information, onenote gick inte så smidigt att öppna som jag tänkte mig, så vi kör ytterligare allt i powershell men att all "text" vi skriver ut skrivs i ett enda stycke längst ned. jag vill även att all bakgrunds arbete (dvs det som sker i powershell/cmd är hidden) inte kommer fram förens skriptet är klart26 nov. 2025Architekterade PowerShell-lösning med dolt bakgrundsarbete och slutlig textutmatning.13sAnvändaren vill:
+
+Enkel kod
+Minimal information
+Allt i PowerShell
+All text i ett enda stycke längst ned (inte uppdelat i många kommandon)
+Allt bakgrundsarbete ska vara hidden tills skriptet är klart
+Öppna webbläsare först
+
+Så jag ska göra:
+
+Öppna webbläsare
+Skapa en PowerShell-kommando som är hidden som samlar all info i en variabel
+Sedan öppna PowerShell synligt och visa allt på en gång
+
+Eller ännu bättre:
+
+Öppna webbläsare
+Kör en hidden PowerShell som samlar info och sedan öppnar en synlig PowerShell med all info färdig att visas
+
+Låt mig tänka på det enklaste sättet:
+
+Öppna browser
+Starta en dold PowerShell som samlar info och sparar till en fil
+Öppna synlig PowerShell och visa innehållet från filen
+
+Eller ännu enklare:
+
+Öppna browser
+Starta PowerShell (synlig) men låt den vänta medan info samlas i bakgrunden
+Visa allt på en gång
+
+Faktiskt, det enklaste är:
+
+En dold PowerShell som samlar all info
+Sedan startar en synlig PowerShell som visar resultatet
+
+Men användaren säger "längst ned" vilket betyder att hen vill ha all output i slutet, inte många separata kommandon.
+Jag tror det bästa är:
+
+Öppna browser
+Kör en PowerShell-kommando som:
+
+Samlar all info (dolt)
+Öppnar en ny PowerShell-window
+Visar all info på en gång
+
+
+
+Jag ser en ännu smidigare lösning med en temporär fil. Processen blir:
+
+Starta webbläsare
+Använd en dold PowerShell för att samla och spara information
+Öppna en synlig PowerShell som läser och presenterar resultatet samlat längst ned
+Perfekt! Här är en superenkel version:
+boot.py
+pythonimport usb_hid
+import storage
+
+usb_hid.enable((usb_hid.Device.KEYBOARD,))
+storage.disable_usb_drive()
+code.py - Superenkelt
+pythonimport time
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+kbd = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(kbd)
+
+def key(*keys):
+    kbd.press(*keys)
+    time.sleep(0.1)
+    kbd.release_all()
+    time.sleep(0.1)
+
+def write(text):
+    layout.write(text)
+
+time.sleep(2)
+
+# Öppna browser
+key(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(2)
+
+# Kör hidden PowerShell som samlar info och visar det i ny synlig PowerShell
+key(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+write("powershell -WindowStyle Hidden -Command \"")
+write("$i='Computer: '+$env:COMPUTERNAME+'`nUser: '+$env:USERNAME+'`nOS: '+(gwmi Win32_OperatingSystem).Caption+'`nCPU: '+(gwmi Win32_Processor).Name+'`nRAM: '+[math]::Round((gwmi Win32_ComputerSystem).TotalPhysicalMemory/1GB,2)+' GB`n`nWARNING: This device accessed your system!`nNEVER plug in unknown USB devices!'; ")
+write("Start-Process powershell -ArgumentList \\\"-NoExit\\\",\\\"-Command\\\",\\\"Write-Host '$i'\\\"\"")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+
+print("Done!")
+```
+
+## Vad händer:
+
+1. ✅ Öppnar webbläsare
+2. ✅ Kör **dold** PowerShell som samlar all info
+3. ✅ Den dolda PowerShell öppnar en **synlig** PowerShell
+4. ✅ All text visas **på en gång** i ett stycke
+5. ✅ Inget syns förrän allt är klart
+
+Output blir typ:
+```
+Computer: DESKTOP-ABC123
+User: Adrian
+OS: Microsoft Windows 11 Pro
+CPU: Intel Core i7-9700K
+RAM: 16 GB
+
+WARNING: This device accessed your system!
+NEVER plug in unknown USB devices!
+Superenkelt och rent!vi gör det ännu enklare, ta bort alla definitioner, sedan när powershell eller cmd öppnas, ta fram systeminformation, sedan gör en echo där vi skriver i ren text varningen vi vill förmedla26 nov. 2025Planerade minimal kod med systeminformation och varningsmeddelande.Användaren vill ha det ännu enklare:
+
+Inga funktionsdefinitioner
+Öppna PowerShell/CMD
+Visa systeminformation
+Echo en varning i ren text
+
+Jag ska göra koden så minimal som möjligt.Perfekt! Här är den absolut enklaste versionen:
+boot.py
+pythonimport usb_hid
+import storage
+
+usb_hid.enable((usb_hid.Device.KEYBOARD,))
+storage.disable_usb_drive()
+code.py - Superenkelt utan definitioner
+pythonimport time
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+kbd = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(kbd)
+
+time.sleep(2)
+
+# Öppna browser
+kbd.press(Keycode.GUI, Keycode.R)
+time.sleep(0.1)
+kbd.release_all()
+time.sleep(0.5)
+layout.write("https://www.cisa.gov/news-events/news/using-caution-usb-drives")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(2)
+
+# Öppna PowerShell
+kbd.press(Keycode.GUI, Keycode.X)
+time.sleep(0.1)
+kbd.release_all()
+time.sleep(0.4)
+kbd.press(Keycode.I)
+kbd.release_all()
+time.sleep(2)
+
+# Systeminformation
+layout.write("systeminfo | findstr /C:\"Host Name\" /C:\"OS Name\" /C:\"OS Version\" /C:\"System Type\" /C:\"Total Physical Memory\"")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(3)
+
+# Varning
+layout.write("echo.")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(0.2)
+
+layout.write("echo WARNING: This USB device accessed your system information!")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(0.2)
+
+layout.write("echo NEVER plug in unknown USB devices!")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+
+print("Done!")
