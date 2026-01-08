@@ -1,1 +1,43 @@
+import time
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
+kbd = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(kbd)
+
+time.sleep(2)
+
+# Open browser
+kbd.press(Keycode.GUI, Keycode.R)
+time.sleep(0.1)
+kbd.release_all()
+time.sleep(0.5)
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(2)
+
+# Open PowerShell
+kbd.press(Keycode.GUI, Keycode.X)
+time.sleep(0.1)
+kbd.release_all()
+time.sleep(0.4)
+kbd.press(Keycode.I)
+kbd.release_all()
+time.sleep(2)
+
+# Systeminformation
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+time.sleep(3)
+
+layout.write("echo \"WARNING: This USB device accessed your system information!\"")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+
+layout.write("echo \"It could have downloaded maliciuos code or locked you out! NEVER plug in unknown USB devices\"")
+kbd.press(Keycode.ENTER)
+kbd.release_all()
+
+print("Done!")
