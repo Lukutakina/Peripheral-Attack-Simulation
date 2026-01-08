@@ -1,6 +1,6 @@
 # Peripheral Attack Simulation Group 22
 
-Adrian Stahlberg  
+Adrian Ståhlberg  
 Felix Jondelius  
 Wilma Winther  
 
