@@ -25,7 +25,7 @@ The project provides a safe and controlled simulation environment for learning a
 
 Attack type BadUSB HID keyboard injection  
 Attack vector USB peripheral acting as a keyboard  
-Target operating system Windows 10  
+Target operating system Windows 11  
 Payload type benign command execution  
 Persistence none  
 Data sensitivity non sensitive system metadata only  
@@ -38,7 +38,7 @@ No malware persistence mechanisms or data exfiltration are used
 
 Raspberry Pi Pico 2W  
 USB cable  
-Test computer or Windows 10 virtual machine  
+Test computer or Windows 11 virtual machine  
 
 ### Software
 
@@ -46,7 +46,7 @@ CircuitPython firmware
 Adafruit CircuitPython HID library  
 Thonny IDE  
 English US keyboard layout  
-Windows 10  
+Windows 11
 
 ## Repository Structure
 
@@ -57,6 +57,7 @@ prompts folder containing llm usb prompts text file
 ## Folder Descriptions
 
 payloads contains documentation of intended keystroke logic and bootfile
+
 prompts contains AI prompts used to generate initial code  
 
 ## Setup Instructions Summary
