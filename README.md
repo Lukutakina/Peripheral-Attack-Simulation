@@ -52,16 +52,12 @@ Windows 10
 
 README md  
 payloads folder containing benign ducky script text file  
-logs folder containing demo logs text file  
 prompts folder containing llm usb prompts text file  
-pico folder containing boot py and code py  
 
 ## Folder Descriptions
 
-payloads contains documentation of intended keystroke logic  
-logs contains output and observations from testing  
+payloads contains documentation of intended keystroke logic and bootfile
 prompts contains AI prompts used to generate initial code  
-pico contains CircuitPython files deployed to the Raspberry Pi Pico  
 
 ## Setup Instructions Summary
 
