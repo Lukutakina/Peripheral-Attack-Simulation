@@ -12,6 +12,8 @@ When connected to a target system the device automatically executes predefined k
 This project is strictly non malicious and intended for educational and research purposes only  
 The goal is to illustrate how real world USB attacks could function if used maliciously  
 
+This project was developed as part of a university course at Halmstad University Sweden and is intended solely for academic use and learning  
+
 ## Purpose
 
 The purpose of this project is to demonstrate how a USB peripheral can execute commands automatically when inserted  
@@ -57,6 +59,7 @@ pico folder containing boot py and code py
 ## Folder Descriptions
 
 payloads contains documentation of intended keystroke logic  
+logs contains output and observations from testing  
 prompts contains AI prompts used to generate initial code  
 pico contains CircuitPython files deployed to the Raspberry Pi Pico  
 
@@ -92,6 +95,11 @@ Disabling unnecessary USB classes
 Firmware integrity validation  
 Operating system hardening  
 User education which remains the most critical defense  
+
+## License
+
+This project is released under the MIT License  
+See the LICENSE file in this repository for full license text  
 
 ## Disclaimer
 
